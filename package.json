@@ -1,5 +1,5 @@
 {
-  "name": "my-turborepo",
+  "name": "Task-app",
   "private": true,
   "scripts": {
     "build": "turbo run build",
