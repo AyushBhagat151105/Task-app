@@ -49,8 +49,12 @@ export const verifEmail = async (req, res) => {
     const ntoken = token.replace(/^:/, "");
     // console.log(ntoken);
 
+    const Invaliddata = {
+      message: "Invalid Token",
+    };
+
     if (!token) {
-      apiResponse(res, "400", "Invalid Token");
+      apiResponse(res, "400", "Invalid Token", Invaliddata);
     }
 
     const user = await prisma.user.findFirst({
@@ -126,6 +130,32 @@ export const login = async (req, res) => {
   }
 };
 
-// export const forgotPassword = async (req, res) => {
+export const me = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    const decoded = jwt.verify(token, process.env.JWT);
+    console.log(decoded);
 
-// }
+    const user = await prisma.user.findFirst({
+      where: {
+        id: decoded.id,
+      },
+    });
+
+    const data = {
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    };
+
+    apiResponse(res, 200, "User Found", data);
+  } catch (error) {
+    console.log(error);
+    apiResponse(res, 400, "Something wnet Wrong");
+  }
+};
+
+export const logout = async (req, res) => {
+  res.clearCookie("token");
+  apiResponse(200, "User Logged Out");
+};
