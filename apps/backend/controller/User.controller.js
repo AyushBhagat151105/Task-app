@@ -130,7 +130,7 @@ export const login = async (req, res) => {
   }
 };
 
-export const me = async (req, res) => {
+export const dashboard = async (req, res) => {
   try {
     const token = req.cookies.token;
     const decoded = jwt.verify(token, process.env.JWT);
@@ -157,5 +157,5 @@ export const me = async (req, res) => {
 
 export const logout = async (req, res) => {
   res.clearCookie("token");
-  apiResponse(200, "User Logged Out");
+  apiResponse(res, 200, "User Logged Out");
 };

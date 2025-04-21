@@ -56,6 +56,16 @@ class ApiClient {
       method: "GET",
     });
   }
+  async dashboard() {
+    return this.customeFetch("/users/dashboard", {
+      method: "GET",
+    });
+  }
+  async logout() {
+    return this.customeFetch("/users/logout", {
+      method: "GET",
+    });
+  }
 }
 
 const apiClient = new ApiClient();

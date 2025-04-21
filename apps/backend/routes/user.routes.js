@@ -1,9 +1,9 @@
 import express from "express";
 import "dotenv/config";
 import {
+  dashboard,
   login,
   logout,
-  me,
   registerUser,
   verifEmail,
 } from "../controller/User.controller.js";
@@ -15,7 +15,7 @@ const router = express.Router();
 router.post("/register", registerUser);
 router.get("/verify/:token", verifEmail);
 router.post("/login", isVerifyed, login);
-router.get("/me", isLogin, me);
+router.get("/dashboard", isLogin, dashboard);
 router.get("/logout", isLogin, logout);
 
 export default router;
