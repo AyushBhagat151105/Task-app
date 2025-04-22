@@ -210,6 +210,9 @@ export const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
 
+    console.log(token, password);
+    
+
     if (!token || !password) {
       apiResponse(res, 400, "Fill all filds");
     }
