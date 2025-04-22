@@ -188,7 +188,7 @@ export const forgotPassword = async (req, res) => {
       },
       data: {
         restPasswordToken: token,
-        restPasswordExpire: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+        restPasswordExpiry: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
       },
     });
 
@@ -217,11 +217,13 @@ export const resetPassword = async (req, res) => {
     const user = await prisma.user.findFirst({
       where: {
         restPasswordToken: token,
-        restPasswordExpire: {
+        restPasswordExpiry: {
           gte: new Date(Date.now()),
         },
       },
     });
+
+    console.log(user);
 
     if (!user) {
       apiResponse(res, 400, "Invalid or expired token");
@@ -236,7 +238,7 @@ export const resetPassword = async (req, res) => {
       data: {
         password: hashedPassword,
         restPasswordToken: null,
-        restPasswordExpire: null,
+        restPasswordExpiry: null,
       },
     });
 
