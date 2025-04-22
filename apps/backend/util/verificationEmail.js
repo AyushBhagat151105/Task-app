@@ -14,7 +14,7 @@ const createEmailTransporter = () => {
   });
 };
 
-const sendVerificationEmail = async (user, token, res) => {
+export const sendVerificationEmail = async (user, token, res) => {
   const transporter = createEmailTransporter();
 
   const mailOptions = {
@@ -41,4 +41,31 @@ const sendVerificationEmail = async (user, token, res) => {
   }
 };
 
-export default sendVerificationEmail;
+export const sendResetEmail = async (user, token, res) => {
+  const transporter = createEmailTransporter();
+
+  const mailOptions = {
+    from: "App <noreply@yourapp.com>",
+    to: user.email,
+    subject: "Reset Password",
+    html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h2 style="color: #333;">Welcome to Our App, ${user.name}!</h2>
+            <p style="color: #555;">Thank you for registering. Please verify your email address by clicking the link below:</p>
+            <a href="${process.env.BASE_URL}/verify/${token}" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Verify Email</a>
+            <p style="color: #555;">If you did not create an account, please ignore this email.</p>
+            <p style="color: #555;">Best regards,<br/>The App Team</p>
+          </div>
+        `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Reset Password email sent to ${user.email}`);
+  } catch (error) {
+    console.error("Error sending Reset Password email:", error);
+    apiResponse(res, 500, "Failed to send Reset Password email");
+  }
+};
+
+// export default { sendVerificationEmail, sendResetEmail };

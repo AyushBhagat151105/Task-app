@@ -27,7 +27,7 @@ export default function Dashboard() {
   const logout = async () => {
     try {
       const data = await apiClient.logout();
-      if (data.status === "200") {
+      if (data.status === 200) {
         navigate("/login");
       }
     } catch (error) {

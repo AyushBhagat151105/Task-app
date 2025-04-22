@@ -4,7 +4,10 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 import apiResponse from "../util/apiRespons.js";
 import { PrismaClient } from "@prisma/client";
-import sendVerificationEmail from "../util/verificationEmail.js";
+import {
+  sendVerificationEmail,
+  sendResetEmail,
+} from "../util/verificationEmail.js";
 import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
@@ -158,4 +161,88 @@ export const dashboard = async (req, res) => {
 export const logout = async (req, res) => {
   res.clearCookie("token");
   apiResponse(res, 200, "User Logged Out");
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      apiResponse(res, 400, "Email is required");
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      apiResponse(res, 400, "User not found with this email");
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const storedToken = await prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        restPasswordToken: token,
+        restPasswordExpire: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+      },
+    });
+
+    if (!storedToken) {
+      apiResponse(res, 400, "Error in storing token");
+    }
+
+    sendResetEmail(user, token, res, "reset Password");
+
+    apiResponse(res, 200, "Check your email for reset password link");
+  } catch (error) {
+    console.log(error);
+    apiResponse(res, 400, "Something went Wrong");
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!token || !password) {
+      apiResponse(res, 400, "Fill all filds");
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        restPasswordToken: token,
+        restPasswordExpire: {
+          gte: new Date(Date.now()),
+        },
+      },
+    });
+
+    if (!user) {
+      apiResponse(res, 400, "Invalid or expired token");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        password: hashedPassword,
+        restPasswordToken: null,
+        restPasswordExpire: null,
+      },
+    });
+
+    apiResponse(res, 200, "Password reset successfully");
+  } catch (error) {
+    console.log(error);
+    apiResponse(res, 400, "Something went Wrong");
+  }
 };
